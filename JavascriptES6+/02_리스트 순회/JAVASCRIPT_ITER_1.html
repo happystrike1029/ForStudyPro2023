@@ -1,0 +1,91 @@
+<script>const log = console.log;</script>
+
+## 기존과 달라진 ES6에서의 리스트 순회
+- for i++
+- for of
+
+<script>
+  const list = [1, 2, 3];
+  for (var i = 0; i < list.length; i++) {
+    // log(list[i]); // 숫자키로 접근하여 리스트 안을 순회하는 방식이었음 
+  }
+  const str = 'abc';
+  for (var i = 0; i < str.length; i++) {
+    // log(str[i]); // 유사배열 역시 동일한 방법으로 순회했었다. 
+  }
+  for (const a of list) {
+    // log(a);
+  }
+  for (const a of str) {
+    // log(a);
+  }
+  // 간단명료하고 보다 선언적으로 바뀌었다. (for of 문)
+</script>
+
+### Array를 통해 알아보기
+
+<script>
+  log('Arr -----------');
+  const arr = [1, 2, 3];
+  for (const a of arr) log(a);
+  // Array는 키값으로 조회가 가능하다. 
+  let iter1 = arr[Symbol.iterator]();
+  for (const a of iter1) log(a);
+</script>
+
+### Set을 통해 알아보기
+
+<script>
+  log('Set -----------');
+  const set = new Set([1, 2, 3]);
+  for (const a of set) log(a);
+</script>
+
+### Map을 통해 알아보기
+
+<script>
+  log('Map -----------');
+  const map = new Map([['a', 1], ['b', 2], ['c', 3]]);
+  for (const a of map) log(a);
+  for (const a of map.keys()) log(a);
+  for (const a of map.values()) log(a);
+  for (const a of map.entries()) log(a);
+  console.clear();
+</script>
+
+@@@ 위를 통해서 알게된 것 
+<script>
+  // Array는 키값으로 조회가 가능하다. 
+  // Set은 키값으로 조회가 되지 않는다. 
+  // 즉 for of 문은 내부적으로 for문과 다르다는 것
+
+  // Symbol은 어떤 객체의 키로 사용이 가능하다. 
+  // log(arr[Symbol.iterator]); 
+    // f values () { [native code] } // 어떤 함수가 들어있다고 나온다. 
+  // arr[Symbol.iterator] = null;
+    // TypeError 발생 (arr is not iterable)
+    // for of 문과 Symbol.iterator 는 연관이 되어 있다.
+    // 즉 arr는 이터러블라고 할 수 있다. 
+    // let iterator = arr[Symbol.iterator]();
+    // next() 메소드를 가진 값 
+    // iterator.next(); 
+    // output >> {value: 1, done : false}
+    // output >> {value: 2, done : false}
+    // output >> {value: 3, done : false}
+    // output >> {value: undefined, done : true}
+    // done이 true가 되면 for of 문에서 빠져나오게끔 되어 있다. 
+// map.keys(); 
+    // MapIterator{"a", "b", "c"}
+    // var a = map.keys();
+    // a.next(); 를 했을 때 
+    // output >> {value: "a", done : false}
+// var e = map[Symbol.iterator](); 
+    // e.next(); 를 했을 때 
+    // output >> {value: Array(2), done : false}
+    // output >> {value: ["a", 1], done : false}
+</script>
+
+## 이터러블/이터레이터 프로토콜
+- 이터러블: 이터레이터를 리턴하는 [Symbol.iterator]() 를 가진 값
+- 이터레이터: { value, done } 객체를 리턴하는 next() 를 가진 값
+- 이터러블/이터레이터 프로토콜: 이터러블을 for...of, 전개 연산자 등과 함께 동작하도록한 규약
