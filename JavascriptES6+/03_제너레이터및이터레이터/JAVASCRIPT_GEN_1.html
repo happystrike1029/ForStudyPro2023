@@ -1,0 +1,118 @@
+script>const log = console.log;</script>
+
+# 제너레이터/이터레이터
+- 제너레이터: 이터레이터이자 이터러블을 생성하는 함수
+<script>
+  /*
+    제너레이터는 이터레이터를 리턴해주는 함수
+  */
+  function* gen(){
+    yield 1;
+    yield 2;
+    yield 3;
+  }
+  let iter3 = gen(); // 제너레이터를 실행한 결과는 이터레이터이다
+  log(iter3.next()); // 제너레이터를 통해 쉽게 이터레이터를 만들 수 있다.
+  log(iter3.next());
+  log(iter3.next());
+</script>
+<script>
+  function* gen() {
+    yield 1;
+    if (false) yield 2;
+    yield 3;
+    return 4;
+  }
+
+  let iter = gen();
+  log(iter[Symbol.iterator]() == iter);
+  // 이 경우에는 이터레이터이자 이터러블이기도 하다.
+  // 심볼 이터레이터의 실행 결과는 자기 자신이다.
+  // 제너레이터는 웰폼드 이터레이터를 리턴하는 함수이다.
+  // 몇번의 next를 통해 값을 꺼내줄 것인지도 정해줄 수 있다.
+  log(iter.next());
+  log(iter.next());
+  log(iter.next());
+  log(iter.next());
+
+  for (const a of gen()) log(a);
+  // 이터레이터이자 이터러블이기 때문에 순회가 가능하다.
+  // 제너레이터같은 경우 마지막에는 return 값을 만들 수 있다.
+    // return "success"
+    // {value : "success", done: true} 형태로 반환
+    // 대신 순회할때는 해당 값은 나오지 않는다.
+    // 제너레이터는 순회할 값을 문장으로 표현한다고도 말할 수 있다.
+    // 이터러블이면 순회할 수 있고 제너레이터는 문장을 통해서 순회할 수 있다.
+  console.clear();
+</script>
+
+
+# odds
+<script>
+  function* infiniTest(i = 0){
+    while(true) yield i++;
+  }
+
+  function* oddsTest(l){    // (1) 값을 발생시키는 걸 제어해주는 함수 , 최대 5보다 작은 홀수만 뽑는
+    for(let i=0; i < l; i++){
+      if(i % 2) yield i;
+    }
+  }
+
+  let iterTest1 = oddsTest(5);
+  log(iterTest1.next());
+  log(iterTest1.next());
+  log(iterTest1.next());
+  log(iterTest1.next());
+  log(iterTest1.next());
+
+  let iterTest2 = infiniTest();
+  log(iterTest2.next()); //무한히 생성 가능
+</script>
+<script>
+  function* infinity(i = 0) {
+    while (true) yield i++;
+  }
+
+  function* limit(l, iter) {
+    for (const a of iter) {
+      yield a;
+      if (a == l) return;
+    }
+  }
+
+  function* odds(l) {
+    for (const a of limit(l, infinity(1))) {
+      if (a % 2) yield a;
+    }
+  }
+
+  let iter2 = odds(10);
+  log(iter2.next());
+  log(iter2.next());
+  log(iter2.next());
+  log(iter2.next());
+  log(iter2.next());
+  log(iter2.next());
+  log(iter2.next());
+
+  for (const a of odds(40)) log(a);
+
+  console.clear();
+</script>
+
+# for of, 전개 연산자, 구조 분해, 나머지 연산자
+
+<script>
+  log(...odds(10));
+  log([...odds(10), ...odds(20)]);
+
+  const [head, ...tail] = odds(5);
+  log(head);
+  log(tail);
+
+  const [a, b, ...rest] = odds(10);
+  log(a);
+  log(b);
+  log(rest);
+</script>
