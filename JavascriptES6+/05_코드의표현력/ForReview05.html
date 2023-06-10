@@ -1,0 +1,169 @@
+
+<html>
+    <header></header>
+    <body>
+        <h1>2023.06.10</h1>
+        <h3>##go, pipe</h3>
+        <div id="goPipeEx"></div>
+        <div id="resultEx"></div>
+    </body>
+</html>
+
+<script>
+    
+    const log = console.log;
+    const products = [
+       {name: '반팔티', price: 15000},
+       {name: '긴팔티', price: 20000},
+       {name: '핸드폰케이스', price: 15000},
+       {name: '후드티', price: 30000},
+       {name: '바지', price: 25000}
+   ];
+    
+    const map = (f, iter) =>{
+        const re =[];
+        for(let value of iter){
+            re.push(f(value));
+        }
+        return re;
+    }
+    // 예시 데이터 
+    log(map(p => p.name, products)); 
+    // map 은 배열 각 요소에 대하여 주어진 함수를 수행한 결과를 모아 새로운 배열을 반환하는 메서드이다. 
+    // 위는 map 의 사용자 정의 
+        // 배열이 아닌 이터러블 프로토콜을 따르는 구조는 map 함수 사용시 undefined가 나타나게 된다. 
+        // 위와 같은 사용자 정의를 통하여 이터러블 프로토콜을 따르는 함수들에 대하여 원하는 값이 출력 가능해진다. 
+
+    const filter = (f, iter) => {
+        const re = [];
+        for(const i of iter){
+            if(f(i)) re.push(i);
+        }
+        return re;
+    }    
+    // 예시 데이터 
+    log(...filter(p => p.price < 20000, products));
+    // filter 는 배열 각 요소에 대하여 주어진 함수의 결과값이 true인 요소들만 모아 새로운 배열로 반환하는 메서드이다. 
+    // map이 내부 함수의 리턴 값이 다양한 타입이 가능했다면, filter는 오로지 boolean 타입만 반환한다. 
+
+    const reduce = (f, acc, iter) =>{
+        if(!iter){
+            iter = acc[Symbol.iterator]();
+            acc = iter.next().value;
+        }
+        for(const a of iter){
+            acc = f(acc, a);
+        }
+        return acc;
+    }
+    // 배열의 각 요소에 대하여 reducer함수를 실행하고, map, filter와 달리 배열이 아닌 하나의 결과값을 반환한다. 
+    // 위는 reduce의 사용자 정의 
+        // 사용자 정의를 통한 함수의 장점은 함수의 교체가 가능하여 다양한 로직의 조합성을 실행할 수 있다는 것이다. 
+
+    let div = document.getElementById("goPipeEx");
+    const go = (...args) => reduce((a, f) => f(a), args); // a가 0이 되고, f가 응용하는 함수가 될때 
+                            // reduce의 함수 및 인자값과, 리턴값 
+    
+    let test = go(
+        0, 
+        a => a + 1, 
+        a => a + 10,
+        a => a + 100);
+    log(test);
+    log(go);
+
+    div.innerHTML += "<h4>go 함수</h4>"
+    div.innerHTML += "식 : " + go;
+    div.innerHTML += "<br>답 : " + test;
+    // 인자들을 받아 하나의 값으로 축약해나가는 형태 
+
+    // 해당 map + filter + reduce 중첩을 조금 더 쉽게 go 함수를 통해 리팩토링이 가능하다. 
+    /*
+        1. filter를 통해 20000이하 가격의 상품을 필터링 
+        2. map을 통해 필터링된 상품들의 가격을 뽑아내기 
+        3. reduce를 통해 가격들을 누적하여 총합을 구하기 
+    */
+    // 위의 조건을 전부 중첩했을 때 
+    const add = (a, b) => a + b;
+    let test2 = go(
+        products, 
+        products => filter(p => p.price <= 20000, products),
+        products => map(p => p.price, products),
+        prices => reduce(add, prices),
+    )
+    log(test2);
+    div.innerHTML += "<h4>go 함수 응용</h4>"
+    div.innerHTML += `
+    조건 : 
+    <pre>
+        1. filter를 통해 20000이하 가격의 상품을 필터링 
+        2. map을 통해 필터링된 상품들의 가격을 뽑아내기 
+        3. reduce를 통해 가격들을 누적하여 총합을 구하기 
+    </pre>`
+    div.innerHTML +=  `
+    식 : 
+    <pre>
+    go(
+        products, 
+        products => filter(p => p.price <= 20000, products),
+        products => map(p => p.price, products),
+        prices => reduce(add, prices),
+    )
+    </pre>`
+    div.innerHTML += `답 : ` + test2
+    // pipe는 함수를 리턴하는 함수 
+    //const pipe = (...fs) => (a) => go(a, ...fs);
+    const pipe = (...funcs) => arg => funcs.reduce((a, f)=> f(a), arg); 
+    const f = pipe(
+        a => a + 1, 
+        a => a + 10,
+        a => a + 100
+    )
+
+    log(f(0)); 
+    log(pipe);
+
+    div.innerHTML += "<h4>pipe 함수</h4>"
+    div.innerHTML +=  `
+    식 : 
+    ${pipe}
+    `
+    div.innerHTML += `
+    <br>답 : ${f(0)} 
+    ` 
+    // pipe 함수는 함수자체를 반환하여 최종적으로 인자값으로 받은 함수리스트를 합성해서 합성된 함수를 가지고 로직을 수행한다. 
+    // pipe 구조 나열 
+    // const pipe = (...funcs) => arg => funcs.reduce((a, f)=> f(a), arg);
+        // ...funcs 인자로 함수들을 받고 
+        // arg는 pipe함수가 실행되어 함축된 함수, 함수의 매개변수이고 
+        // 함수들을 함축해야 하므로 pipe의 인자로 들어온 함수들에 reduce를 사용한다. 
+        // reduce의 시작으로 함축된 함수의 매개변수인 arg를 전달해준다. 
+        // 처음 reduce가 실행될 때는 a가 pipe함수의 실행 결과인 함수의 인자값이 들어가고 
+        // 그 다음부터는 함수의 실행 결과값이 a가 되어 누산되는 과정이 된다. 
+
+    // pipe 함수를 통한 리팩토링 추후 진행 
+
+
+</script>
+
+<script>
+    let resultDiv = document.getElementById("resultEx");
+    resultDiv.innerHTML += 
+    `<pre> 
+    <h3> 간단한 정리 : </h3>
+    1. map, filter, reduce는 내장되어 있는 함수로 사용할 수도 있지만 사용자 정의 함수로 변환하여 만들 수 있다. 
+    2. 사용자 정의 함수로 만들어 사용하는 경우에는 이터러블 프로토콜을 따르는 함수들에 대하여 원하는 값을 출력할 수 있게 된다. 
+    3. 지난주에 이어 간단하게 정리되는 부분 
+        - map : 각 조건에 수행하는 결과를 모아 원하는 배열을 만들어주는 메서드 
+        - filter : 조건에 따른 수행하는 결과가 true인 경우들만 모아 배열을 만들어주는 메서드 
+        - reduce : reducer(*현재 상태와 액션 객체를 파라미터로 받아와서 새로운 상태를 반환해주는 함수)를 요소마다 실행하고 하나의 결과값을 반환해주는 메서드 
+    3. go 함수 
+        - 함수형 프로그래밍에서 코드를 값으로 다루는 아이디어 
+        - 인자를 받아 결과를 바로 산출해내는 함수이다. (함수를 연속적으로 실행한 후 이전에 실행된 함수의 결과를 다음 함수에 전달하는 함수)
+        - 평가하는 시점을 원하는대로 다룰 수 있고 코드의 표현력을 높일 수 있다. 
+    4. pipe 함수 
+        - go 함수가 즉시실행하여 결과값을 반환해 다음 함수로 전달한다면 
+        - pipe함수는 함수자체를 반환하여 최종적으로 인자값으로 받은 함수리스트를 합성해서 합성된 함수를 가지고 로직을 수행한다. 
+    </pre>
+    `
+</script>

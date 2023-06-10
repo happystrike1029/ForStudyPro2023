@@ -1,0 +1,54 @@
+<script src="../lib/ForReview04_2.js"></script>
+<html>
+    <header></header>
+    <body>
+        <div id="test01"></div>
+        <div id="test02"></div>
+        <div id="test03"></div>
+    </body>
+</html>
+<script>
+    const products = [
+       {name: '반팔티', price: 15000},
+       {name: '긴팔티', price: 20000},
+       {name: '핸드폰케이스', price: 15000},
+       {name: '후드티', price: 30000},
+       {name: '바지', price: 25000}
+   ];
+
+   log(map(p=> p.price, products));
+   let test = map(p=> p.price, products);
+   let div = document.getElementById("test01");
+   div.innerHTML += "상품들의 가격을 전부 출력 :  " + test;
+
+   // 위와 같은 경우에는 상품들의 가격을 전부 출력할 수 있다. 
+   // 조건을 추가적으로 걸고 출력하고 싶은 경우 
+       // 예) 20000원 이하의 상품만 출력 
+   log(map(p => p.price, filter(p => p.price <= 20000, products)));    
+   let test2 = map(p => p.price, filter(p => p.price <= 20000, products));
+   let div2 = document.getElementById("test02");
+   div2.innerHTML += "상품들의 20000원 이하 가격을 전부 출력 :  " + test2;
+
+   // 2만원 이하의 모든 가격을 합친 값 필요 
+   const add  = (a, b) => a+b;
+   log(
+    reduce(
+        add, 
+         map(p => p.price, 
+            filter(p => p.price <= 20000, products)))); 
+    let test3 = 
+        reduce(
+            add, 
+            map(p => p.price, 
+                filter(p => p.price <= 20000, products)));
+    let div3 = document.getElementById("test03");
+    div3.innerHTML += "상품들의 2만원 이하 가격을 전부 합한 값 : " + test3;
+
+    // 함수들을 중첩하고 연속적으로 실행하며 하나의 값으로 평가를 만들 수 있다. 
+
+   log(
+    reduce(
+        add, [10, 20, 30, 40])); // 특정 배열 및 숫자를 놓고 평가하기 쉬운 형태 
+
+    // 함수형 프로그래밍 사고의 중요성 
+</script>
